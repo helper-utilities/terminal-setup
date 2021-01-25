@@ -38,8 +38,10 @@ function terminal-setup {
 	cp ~/.bash_profile "$output_dir/.bash_profile" && 
 	cp ~/.zshrc "$output_dir/.zshrc" &&
 	sudo cp -r ~/.oh-my-zsh/ "$output_dir/.oh-my-zsh" &&
-	cp -r ~/.config/starship.toml "$output_dir/.config/starship.toml"
-
+	cp -r ~/.config/starship.toml "$output_dir/.config/starship.toml" &&
+	zip -r "$output_dir/.oh-my-zsh.zip" "$output_dir/.oh-my-zsh" &&
+	sudo rm -r "$output_dir/.oh-my-zsh" &&
+	clear && echo "terminal files copied successfully"
 	# mv ".bashrc" ".bash_profile" ".zshrc" ".oh-my-zsh" ".config" "$output_dir"
 
 }
