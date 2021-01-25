@@ -1,0 +1,45 @@
+add_newline=false
+
+format="""
+$username\
+$custom\
+$git_branch\
+$git_commit\
+$git_status\
+$cmd_duration\
+$line_break\
+$character"""
+
+[username]
+show_always=true
+format="[$user](cyan)"
+
+[custom.directory]
+command="pwd"
+format=" in [$output](yellow)"
+when="test 1==1"
+# [directory]
+# format="in [$path](yellow)"
+# truncation_length = -1
+# truncation_symbol = "…/"
+# use_logical_path=false
+
+[git_branch]
+format=" on [$symbol$branch](purple)"
+
+[git_commit]
+commit_hash_length=7
+only_detached=false
+format="[:$hash](purple)"
+
+[git_status]
+format=" [$ahead_behind$conflicted$modified$untracked]()"
+ahead="[⇡](bold green)"
+behind="[⇣](bold red)"
+conflicted="[!](bold red)"
+untracked="[?](bold yellow)"
+modified="[~](bold yellow)"
+
+[character]
+success_symbol = "[➜](bold green) "
+error_symbol = "[➜](bold red) "
