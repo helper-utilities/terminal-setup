@@ -3,8 +3,11 @@
 
 # alias cons="cd /Users/mbp/Desktop/Desktop/Projects/personal/Wifi-Consumption/src && javac balance.java && javac WiFi.java && java balance && cd ~/Desktop"
 
+alias sp="spotdl"
+
 alias cons="npm start --prefix ~/Desktop/Desktop/Projects/personal/sodetel"
 
+# DEV
 alias cor="npm start --prefix ~/Desktop/Desktop/Projects/personal/corona"
 alias corl="cor lebanon"
 
@@ -26,6 +29,7 @@ alias mongod="sudo mongod --dbpath /System/Volumes/Data/data/db"
 # ***** CUSTOM FUNCTIONS *****
 # RUNNING C & JAVA FILES
 function runc { gcc "$1" && ./a.out "$2" "$3" ; }
+function runmpic { mpicc "$1" && mpirun -np "$2" ./a.out "$3" "$4" ; }
 function runj { javac "$1" && java "$1" ; }
 function runr { Rscript "$1" ; }
 function runp { python3.7 "$1" ; }
@@ -54,7 +58,7 @@ function TSsetup {
 }
 
 # TO PUSH TO GITHUB PUSH ${MESSAGE}
-function push { git add . && git commit -m "$1" && git push origin master ; }
+function push { git add . && git commit -m "$1" && git push origin main ; }
 function pushh { git add . && git commit -m "$1" && git push heroku master ; }
 
 # ENCRYPT/DECRYPT A SINGLE FILE
@@ -84,10 +88,26 @@ function uzip {
 
 # EXTRACT PANOPTO VIDEO
 function pan {
-
 echo '
 window.location = document.querySelector(`meta[property="og:video:secure_url"]`).content;
 '
+}
+
+# DOWNLOAD YOUTUBE VIDEOS
+function ytmp4 {
+	# youtube-dl --abort-on-error --no-playlist -k --format 'bestvideo+bestaudio/best' $@;
+	youtube-dl --abort-on-error --no-playlist --format 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' $@;
+}
+
+# DOWNLOAD YOUTUBE VIDEOS AS MP3
+function ytmp3 {
+	youtube-dl --abort-on-error --no-playlist --write-thumbnail --extract-audio --audio-format mp3 --audio-quality 192k --format 'best' $@;
+}
+
+function mkvtomp4 {
+	for i in $@; do
+		ffmpeg -i $i -c copy ${i%.mkv}.mp4;
+	done
 }
 
 # EXTRACT TORRENT LINKS CODE
@@ -114,7 +134,7 @@ function getLinksBetween(minSize=50, maxSize=700, byteSize='MB', minSeed=1) {
 		const nameA = [...el.querySelectorAll('.name a')][1]; // name of link
 		const size = parseFloat(el.querySelector('.size').innerText.split(' ')[0]);
 
-        if(!nameA.href.includes('GalaXXXy'))
+        if(!nameA.href.includes('GalaXXXy') && !nameA.href.includes('XvX'))
 			torrents.push({size, name: nameA.innerText, link: nameA.href});
 	});
 
@@ -254,6 +274,12 @@ function pngtojpg {
 	else 
 		sips --setProperty format jpeg --setProperty "formatOptions" "$option" "${dir}" --out "${dir%.png}.jpg"
 	fi
+}
+
+function spTrackingFiles {
+	for file in *.spotdlTrackingFile; do
+		sp $file;
+	done
 }
 
 
