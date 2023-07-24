@@ -1,16 +1,7 @@
 # ***** CUSTOM ALIASES *****
 # Aliases Establishing custom commands below
 
-# alias cons="cd /Users/mbp/Desktop/Desktop/Projects/personal/Wifi-Consumption/src && javac balance.java && javac WiFi.java && java balance && cd ~/Desktop"
-
-alias sp="spotdl"
-
-alias cons="npm start --prefix ~/Desktop/Desktop/Projects/personal/sodetel"
-
 # DEV
-alias cor="npm start --prefix ~/Desktop/Desktop/Projects/personal/corona"
-alias corl="cor lebanon"
-
 alias obp="code ~/.bash_profile"
 alias obr="code ~/.bashrc"
 
@@ -24,7 +15,9 @@ alias npmu="npm uninstall"
 alias tnode="ts-node"
 alias tnodemon="ts-node-dev --respawn"
 
-alias mongod="sudo mongod --dbpath /System/Volumes/Data/data/db"
+alias mongod="sudo mongod --dbpath /opt/homebrew/var/mongodb"
+
+alias pskill="ps | awk {'print $1'} | awk 'NR>1' | xargs kill -9"
 
 # ***** CUSTOM FUNCTIONS *****
 # RUNNING C & JAVA FILES
@@ -38,8 +31,8 @@ function terminal-setup {
 	mkdir -p "terminal-files/.config" &&
 	output_dir="${PWD}/terminal-files" &&
 
-	cp ~/.bashrc "$output_dir/.bashrc" && 
-	cp ~/.bash_profile "$output_dir/.bash_profile" && 
+	cp ~/.bashrc "$output_dir/.bashrc" &&
+	cp ~/.bash_profile "$output_dir/.bash_profile" &&
 	cp ~/.zshrc "$output_dir/.zshrc" &&
 	sudo cp -r ~/.oh-my-zsh/ "$output_dir/.oh-my-zsh" &&
 	cp -r ~/.config/starship.toml "$output_dir/.config/starship.toml" &&
@@ -58,8 +51,12 @@ function TSsetup {
 }
 
 # TO PUSH TO GITHUB PUSH ${MESSAGE}
-function push { git add . && git commit -m "$1" && git push origin main ; }
-function pushh { git add . && git commit -m "$1" && git push heroku master ; }
+function commit { git add . && git commit -m "$1" ; }
+function uncommit { git reset --soft HEAD~$1 ; }
+function push { git add . && git commit -m "$1" && git push ; }
+function stash { git stash push -m "$1" -u -k ; }
+function stash-staged { git stash push -m "$1" --staged ; }
+function stash-unstaged { git stash push -m "$1" -u ; }
 
 # ENCRYPT/DECRYPT A SINGLE FILE
 function enc { openssl aes-256-cbc -in "$1" -out "$2" ; }
@@ -84,13 +81,6 @@ function uzip {
 	for i in "$@"
 		unzip "$i"
 	; cat /dev/null > ~/.zsh_history ;
-}
-
-# EXTRACT PANOPTO VIDEO
-function pan {
-echo '
-window.location = document.querySelector(`meta[property="og:video:secure_url"]`).content;
-'
 }
 
 # DOWNLOAD YOUTUBE VIDEOS
@@ -146,8 +136,87 @@ function getLinksBetween(minSize=50, maxSize=700, byteSize='MB', minSeed=1) {
 	    window.location = document.querySelector('.pagination .active').nextSibling.nextSibling.firstChild.href;
 }
 
-getLinksBetween(300, 700, 'MB');
+getLinksBetween(300, 900, 'MB');
 "
+}
+
+function listPRs() {
+	echo "
+	function listPRs(name = "JeffreyJoumjian") {
+		function formatPRs(prs) {
+			const formattedPRs = prs.map((pr) => {
+				const { repo, name, link } = pr;
+
+				const repoNameCapitalized = repo
+					.split("-")
+					.map((text) => text.charAt(0).toUpperCase() + text.slice(1))
+					.join("-");
+
+				return `* [${repoNameCapitalized}] [${name}](${link})`;
+			});
+
+			return formattedPRs.join("\n");
+		}
+
+		const frontendRepos = [
+			"introvoke-admin",
+			"introvoke-embed",
+			"introvoke-demos",
+		];
+
+		const githubBaseUrl = "https://github.com";
+
+		const PRs = [...document.querySelectorAll(".js-issue-row")]
+			.filter((row) => {
+				const assignee = row.querySelector(
+					`.AvatarStack-body[aria-label='Assigned to ${name}']`
+				);
+
+				return Boolean(assignee);
+			})
+			.map((row) => {
+				const repo = row
+					.querySelector(".ghh-repo-x")
+					.textContent.trim()
+					.replace("introvoke/introvoke", "introvoke")
+					.replace("introvoke-", "")
+					.replace("introvoke/", "");
+
+				const repoLink = githubBaseUrl.concat(
+					row.querySelector(".ghh-repo-x").getAttribute("href")
+				);
+				const name = row
+					.querySelector(".ghh-issue-x")
+					.textContent.trim()
+					.replace("[", "(")
+					.replace("]", ")");
+				const link = githubBaseUrl.concat(
+					row.querySelector(".ghh-issue-x").getAttribute("href")
+				);
+
+				return { repo, repoLink, name, link };
+			});
+
+		const frontendPRs = PRs.filter((pr) =>
+			frontendRepos.some((repo) => pr.repoLink.includes(repo))
+		);
+
+		const backendPRs = PRs.filter(
+			(pr) => !frontendRepos.some((repo) => pr.repoLink.includes(repo))
+		);
+
+		console.log(
+			"*Frontend PRs*\n",
+			formatPRs(frontendPRs),
+			"\n",
+			"\n",
+			"*Backend PRs*\n",
+			formatPRs(backendPRs)
+		);
+	}
+
+	getPRs();
+	"
 }
 
 # COMPRESS PDF FILES
@@ -188,7 +257,7 @@ function fromwebp {
 			mv "${img%.webp}.${format}" $output_dir;
 		done
 	# if single image
-	else 
+	else
 		dwebp $dir -quiet -o "${dir%.webp}.${format}" -resize $size $size;
 	fi
 }
@@ -207,7 +276,7 @@ function towebp {
 			mv "${img%.$format}.webp" $output_dir;
 		done
 	# if single image
-	else 
+	else
 		cwebp $dir -quiet -o "${dir%.$format}.webp" ;
 	fi
 }
@@ -217,7 +286,7 @@ function towebp {
 # function webpc32 {
 # 	format="$1"
 # 	dir="$2"
-	
+
 # 	w=32
 # 	h=32
 
@@ -230,16 +299,16 @@ function towebp {
 # 			mv "${img%.webp}.${format}" $output_dir;
 # 		done
 # 	# if single image
-# 	else 
-# 		dwebp $dir -quiet -o "${dir%.webp}.${format}" -resize $w $h; 
+# 	else
+# 		dwebp $dir -quiet -o "${dir%.webp}.${format}" -resize $w $h;
 # 	fi
-# 
+#
 
 # # webpc <format> <img or dir> -i (if img and not dir>)
 # function webpc256 {
 # 	format="$1"
 # 	dir="$2"
-	
+
 # 	w=256
 # 	h=256
 
@@ -252,8 +321,8 @@ function towebp {
 # 			mv "${img%.webp}.${format}" $output_dir;
 # 		done
 # 	# if single image
-# 	else 
-# 		dwebp $dir -quiet -o "${dir%.webp}.${format}" -resize $w $h; 
+# 	else
+# 		dwebp $dir -quiet -o "${dir%.webp}.${format}" -resize $w $h;
 # 	fi
 # }
 # pngtojpg <img or dir> -i (if img and not dir>)
@@ -271,111 +340,9 @@ function pngtojpg {
 			mv "${img%.png}.jpg" $output_dir;
 		done
 	# if single image
-	else 
+	else
 		sips --setProperty format jpeg --setProperty "formatOptions" "$option" "${dir}" --out "${dir%.png}.jpg"
 	fi
 }
 
-function spTrackingFiles {
-	for file in *.spotdlTrackingFile; do
-		sp $file;
-	done
-}
-
-
-function pptaudio {
-	count=1;
-	ppt_name="$1"
-	zip_file="${ppt_name%.pptx}.zip"
-	file_name="${zip_file%.zip}"
-	output_dir="${file_name}-audio-files"
-	
-	mkdir "${output_dir}" && 
-	sudo cp "$1" "${zip_file}" &&
-	open -a "The Unarchiver.app" "${zip_file}" &&
-	sleep 2 &&
-	mv $file_name/ppt/media/*.m4a $output_dir &&
-	# Not renaming in the correct order
-	# for file in $file_name/ppt/media/*.m4a; do 
-	# 	if ((count < 10)); then
-    #     	mv $file  "$output_dir/0$((count++))-audio.m4a";
-	# 	else
-    #     	mv $file  "$output_dir/$((count++))-audio.m4a";
-	# 	fi
-	# done &&
-	rm -rf "$zip_file" "$file_name";
-}
-
-
-# ***** R *****
-# download caret and all its dependencies
-function installCaret {
-echo "
-installCaret = function() {
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/withr_2.2.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/tibble_3.0.1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/scales_1.1.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/rlang_0.4.5.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/isoband_0.2.1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/gtable_0.3.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/glue_1.4.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/digest_0.6.25.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/ggplot2_3.3.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/R6_2.4.1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/lifecycle_0.2.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/munsell_0.5.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/colorspace_1.4-1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/ellipsis_0.3.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/magrittr_1.5.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/pillar_1.4.3.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/crayon_1.3.4.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/vctrs_0.2.4.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/pkgconfig_2.0.3.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/foreach_1.5.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/iterators_1.0.12.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/plyr_1.8.6.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/Rcpp_1.0.4.6.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/recipes_0.1.10.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/timeDate_3043.102.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/dplyr_0.8.5.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/assertthat_0.2.1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/tidyselect_1.0.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/purrr_0.3.4.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/generics_0.0.2.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/gower_0.2.1.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/ipred_0.9-9.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/prodlim_2019.11.13.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/lava_1.6.7.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/lubridate_1.7.8.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/reshape2_1.4.4.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/stringr_1.4.0.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/stringi_1.4.6.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/ModelMetrics_1.2.2.2.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/data.table_1.12.8.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/pROC_1.16.2.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/e1071_1.7-3.tgz', dependencies=T)
-install.packages('https://cran.r-project.org/bin/macosx/contrib/4.0/caret_6.0-86.tgz', dependencies=T)
-}
-installCaret()
-"
-}
-
-
-# ***** ANACONDA *****
-# added by Anaconda3 2019.10 installer
-# >>> conda init >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$(CONDA_REPORT_ERRORS=false '/Users/mbp/opt/anaconda3/bin/conda' shell.bash hook 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    \eval "$__conda_setup"
-else
-    if [ -f "/Users/mbp/opt/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/mbp/opt/anaconda3/etc/profile.d/conda.sh"
-        CONDA_CHANGEPS1=false conda activate base
-    else
-        \export PATH="/Users/mbp/opt/anaconda3/bin:$PATH"
-    fi
-fi
-# conda deactivate;
-unset __conda_setup
-# <<< conda init <<<
+PATH=~/.console-ninja/.bin:$PATH
