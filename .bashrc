@@ -137,86 +137,86 @@ function getLinksBetween(minSize=50, maxSize=700, byteSize='MB', minSeed=1) {
 }
 
 getLinksBetween(300, 900, 'MB');
-"
+" | pbcopy
 }
 
 function listPRs() {
-	echo "
-	function listPRs(name = "JeffreyJoumjian") {
-		function formatPRs(prs) {
-			const formattedPRs = prs.map((pr) => {
-				const { repo, name, link } = pr;
+echo "
+function listPRs(name = 'JeffreyJoumjian') {
+	function formatPRs(prs) {
+		return prs.map((pr) => {
+			const { repo, name, link } = pr;
 
-				const repoNameCapitalized = repo
-					.split("-")
-					.map((text) => text.charAt(0).toUpperCase() + text.slice(1))
-					.join("-");
+			const repoNameCapitalized = repo
+				.split('-')
+				.map((text) => text.charAt(0).toUpperCase() + text.slice(1))
+				.join('-');
 
-				return `* [${repoNameCapitalized}] [${name}](${link})`;
-			});
-
-			return formattedPRs.join("\n");
-		}
-
-		const frontendRepos = [
-			"introvoke-admin",
-			"introvoke-embed",
-			"introvoke-demos",
-		];
-
-		const githubBaseUrl = "https://github.com";
-
-		const PRs = [...document.querySelectorAll(".js-issue-row")]
-			.filter((row) => {
-				const assignee = row.querySelector(
-					`.AvatarStack-body[aria-label='Assigned to ${name}']`
-				);
-
-				return Boolean(assignee);
-			})
-			.map((row) => {
-				const repo = row
-					.querySelector(".ghh-repo-x")
-					.textContent.trim()
-					.replace("introvoke/introvoke", "introvoke")
-					.replace("introvoke-", "")
-					.replace("introvoke/", "");
-
-				const repoLink = githubBaseUrl.concat(
-					row.querySelector(".ghh-repo-x").getAttribute("href")
-				);
-				const name = row
-					.querySelector(".ghh-issue-x")
-					.textContent.trim()
-					.replace("[", "(")
-					.replace("]", ")");
-				const link = githubBaseUrl.concat(
-					row.querySelector(".ghh-issue-x").getAttribute("href")
-				);
-
-				return { repo, repoLink, name, link };
-			});
-
-		const frontendPRs = PRs.filter((pr) =>
-			frontendRepos.some((repo) => pr.repoLink.includes(repo))
-		);
-
-		const backendPRs = PRs.filter(
-			(pr) => !frontendRepos.some((repo) => pr.repoLink.includes(repo))
-		);
-
-		console.log(
-			"*Frontend PRs*\n",
-			formatPRs(frontendPRs),
-			"\n",
-			"\n",
-			"*Backend PRs*\n",
-			formatPRs(backendPRs)
-		);
+			return '* [' + repoNameCapitalized + ']' +
+				'[' + name + ']' +
+				'(' + link + ')';
+		}).join('\\\n');
 	}
 
-	getPRs();
-	"
+	const frontendRepos = ['introvoke-admin','introvoke-embed','introvoke-demos'];
+
+	const githubBaseUrl = 'https://github.com';
+
+	const PRs = [...document.querySelectorAll('.js-issue-row')]
+		.filter((row) => {
+
+		const assignee = row.querySelector(
+			\`.AvatarStack-body[aria-label='Assigned to \${name}']\`
+		);
+
+		return Boolean(assignee);
+	})
+	.map((row) => {
+		const repo = row
+			.querySelector('.ghh-repo-x')
+			.textContent.trim()
+			.replace('introvoke/introvoke', 'introvoke')
+			.replace('introvoke-', '')
+			.replace('introvoke/', '');
+
+		const repoLink = githubBaseUrl.concat(
+			row.querySelector('.ghh-repo-x').getAttribute('href')
+		);
+
+		const name = row
+			.querySelector('.ghh-issue-x')
+			.textContent.trim()
+			.replace('[', '(')
+			.replace(']', ')');
+
+		const link = githubBaseUrl.concat(
+			row.querySelector('.ghh-issue-x').getAttribute('href')
+		);
+
+		return { repo, repoLink, name, link };
+	});
+
+	const frontendPRs = PRs.filter((pr) =>
+		frontendRepos.some((repo) => pr.repoLink.includes(repo))
+	);
+
+	const backendPRs = PRs.filter(
+		(pr) => !frontendRepos.some((repo) => pr.repoLink.includes(repo))
+	);
+
+	console.log(
+		'*Frontend PRs*\\\n',
+		'------------\\\n',
+		formatPRs(frontendPRs),
+		'\\\n','\\\n',
+		'*Backend PRs*\\\n',
+		'------------\\\n',
+		formatPRs(backendPRs),
+	);
+}
+
+listPRs();
+" | pbcopy
 }
 
 # COMPRESS PDF FILES
