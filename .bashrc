@@ -152,7 +152,7 @@ function listPRs(name = 'JeffreyJoumjian') {
 				.map((text) => text.charAt(0).toUpperCase() + text.slice(1))
 				.join('-');
 
-			return '* [' + repoNameCapitalized + ']' +
+			return '- [' + repoNameCapitalized + ']' +
 				'[' + name + ']' +
 				'(' + link + ')';
 		}).join('\\\n');
